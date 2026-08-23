@@ -15,8 +15,11 @@ Designed specifically to integrate seamlessly with custom setups and themes like
 
 - **Native Integration:** Sits neatly at the bottom of your workspace tabs, expanding and collapsing just like a native Zen sidebar element.
 - **Theme-Aware Aesthetics:** Automatically inherits your current Zen or Sine themes (background colors, text colors, borders, border-radius, and hover states). No hardcoded colors!
-- **Interactive Agenda:** Click any day to add, edit, or delete events. See at a glance which days have events with subtle, color-coded event dots on the calendar grid.
-- **Dynamic Accent Colors:** Personalize the today highlight, dates, and buttons with custom accent colors directly from the settings.
+- **Interactive Agenda & Event Dots:** Click any day to add, edit, or delete events. See at a glance which days have events with subtle, color-coded event dots on the calendar grid.
+- **Dynamic Accent Colors:** Has different accent colors to choose from. This is shown below with the Agenda and Event dots enabled:
+  <br/><br/>
+  <img src="assets/orange-accent.png" alt="Orange Accent with Agenda and Dots" width="45%" />
+  <br/><br/>
 - **Live Settings (via Sine):** Tweak the calendar without restarting your browser! Changes to preferences instantly apply on the fly.
 - **Compact Mode:** Need more space for your tabs? Toggle the compact mode for a denser, smaller calendar footprint.
 - **Header Date Highlight:** A beautiful, accent-colored current date string (e.g. `· 23 Aug`) dynamically displays next to the Calendar title.
