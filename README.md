@@ -4,6 +4,13 @@ An elegant, interactive, and fully theme-aware sidebar calendar mod for [Zen Bro
 
 Designed specifically to integrate seamlessly with custom setups and themes like **Arc 2.0** and **Wireframe 2.0**, this calendar lives right in your sidebar, keeping your schedule perfectly organized without breaking your workflow.
 
+<div align="center">
+  <img src="assets/expanded.png" alt="Zen Calendar Expanded" width="45%" />
+  <img src="assets/collapsed.png" alt="Zen Calendar Collapsed" width="45%" />
+  <br />
+  <em>The calendar integrates seamlessly with the Zen sidebar, perfectly adapting to both its expanded and collapsed states.</em>
+</div>
+
 ## ✨ Features
 
 - **Native Integration:** Sits neatly at the bottom of your workspace tabs, expanding and collapsing just like a native Zen sidebar element.
