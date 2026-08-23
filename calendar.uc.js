@@ -1,353 +1,654 @@
+// ==UserScript==
+// @name           Zen Calendar
+// @version        1.0.0
+// @description    Interactive sidebar calendar for Zen Browser
+// @author         Abh1jeet
+// @include        main
+// @include        chrome://browser/content/browser.xhtml
+// ==/UserScript==
+
 (() => {
   "use strict";
 
   const ID = "zen-calendar-mod";
 
+  // Prevent multiple initializations in the same window
   if (document.getElementById(ID)) return;
 
-  const state = {
-    date: new Date(),
-    selected: new Date(),
-    events: JSON.parse(
-      Services.prefs.getStringPref(
-        "zen-calendar.events",
-        "{}"
-      )
-    )
+  // Safe preference helper with fallback
+  const Prefs = {
+    getString(key, defaultVal = "") {
+      try {
+        if (typeof Services !== "undefined" && Services.prefs) {
+          if (Services.prefs.prefHasUserValue(key)) {
+            return Services.prefs.getStringPref(key);
+          }
+        }
+      } catch (e) {}
+      try {
+        const stored = localStorage.getItem(key);
+        if (stored !== null) return stored;
+      } catch (e) {}
+      return defaultVal;
+    },
+    setString(key, val) {
+      try {
+        if (typeof Services !== "undefined" && Services.prefs) {
+          Services.prefs.setStringPref(key, String(val));
+        }
+      } catch (e) {}
+      try {
+        localStorage.setItem(key, String(val));
+      } catch (e) {}
+    },
+    getBool(key, defaultVal = false) {
+      try {
+        if (typeof Services !== "undefined" && Services.prefs) {
+          if (Services.prefs.prefHasUserValue(key)) {
+            return Services.prefs.getBoolPref(key);
+          }
+        }
+      } catch (e) {}
+      try {
+        const stored = localStorage.getItem(key);
+        if (stored !== null) return stored === "true";
+      } catch (e) {}
+      return defaultVal;
+    }
   };
 
-  function saveEvents() {
-    Services.prefs.setStringPref(
-      "zen-calendar.events",
-      JSON.stringify(state.events)
-    );
-  }
-
+  // Helper date utilities
   function pad(n) {
     return String(n).padStart(2, "0");
   }
 
-  function key(date) {
+  function formatDateKey(date) {
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   }
 
-  function monthName(date) {
-    return date.toLocaleString("default", {
-      month: "long"
-    });
+  function isSameDay(d1, d2) {
+    return (
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
+    );
   }
 
-  function create(tag, className, text) {
+  function isToday(date) {
+    return isSameDay(date, new Date());
+  }
+
+  function monthName(date) {
+    return date.toLocaleString("default", { month: "long" });
+  }
+
+  function weekdayName(date) {
+    return date.toLocaleString("default", { weekday: "short" });
+  }
+
+  function formatAgendaHeader(date) {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const formattedDate = date.toLocaleString("default", {
+      weekday: "short",
+      month: "short",
+      day: "numeric"
+    });
+
+    if (isSameDay(date, today)) {
+      return `Today · ${formattedDate}`;
+    } else if (isSameDay(date, yesterday)) {
+      return `Yesterday · ${formattedDate}`;
+    } else if (isSameDay(date, tomorrow)) {
+      return `Tomorrow · ${formattedDate}`;
+    }
+    return formattedDate;
+  }
+
+  // Load initial demo events if storage is completely empty
+  function getInitialEvents() {
+    const raw = Prefs.getString("zen-calendar.events", "");
+    if (raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (e) {}
+    }
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = pad(now.getMonth() + 1);
+    const todayKey = formatDateKey(now);
+
+    const defaultEvents = {
+      [todayKey]: [
+        { id: "1", time: "10:00 AM", duration: "1h", text: "Project Review", color: "#3b82f6" },
+        { id: "2", time: "02:30 PM", duration: "45m", text: "Assignment", color: "#ef4444" },
+        { id: "3", time: "07:00 PM", duration: "1h", text: "Gym", color: "#22c55e" }
+      ],
+      [`${currentYear}-${currentMonth}-01`]: [{ id: "d1", color: "#3b82f6", text: "Planning" }],
+      [`${currentYear}-${currentMonth}-13`]: [{ id: "d13", color: "#22c55e", text: "Gym Session" }],
+      [`${currentYear}-${currentMonth}-14`]: [{ id: "d14", color: "#22c55e", text: "Cardio" }],
+      [`${currentYear}-${currentMonth}-20`]: [{ id: "d20", color: "#ef4444", text: "Project Milestone" }],
+      [`${currentYear}-${currentMonth}-21`]: [{ id: "d21", color: "#22c55e", text: "Workout" }],
+      [`${currentYear}-${currentMonth}-31`]: [{ id: "d31", color: "#3b82f6", text: "Monthly Review" }]
+    };
+
+    return defaultEvents;
+  }
+
+  const state = {
+    viewDate: new Date(),
+    selectedDate: new Date(),
+    events: getInitialEvents(),
+    showModal: false,
+    showMenu: false,
+    selectedColor: "#3b82f6"
+  };
+
+  function saveEvents() {
+    Prefs.setString("zen-calendar.events", JSON.stringify(state.events));
+  }
+
+  function createEl(tag, className, text) {
     const el = document.createElement(tag);
-
-    if (className)
-      el.className = className;
-
-    if (text !== undefined)
-      el.textContent = text;
-
+    if (className) el.className = className;
+    if (text !== undefined) el.textContent = text;
     return el;
   }
 
-  function render() {
-    const root = document.getElementById(ID);
+  // Render Calendar Grid & Header
+  function renderCalendar(container) {
+    container.replaceChildren();
 
-    if (!root)
-      return;
-
-    const calendar = root.querySelector(".zc-calendar");
-    calendar.replaceChildren();
-
-    const header = create("div", "zc-header");
-
-    const title = create(
-      "div",
-      "zc-title",
-      `${monthName(state.date)} ${state.date.getFullYear()}`
+    // 1. Month Bar
+    const monthBar = createEl("div", "zc-month-bar");
+    const monthTitle = createEl(
+      "button",
+      "zc-month-title",
+      `${monthName(state.viewDate)} ${state.viewDate.getFullYear()}`
     );
-
-    const controls = create("div", "zc-controls");
-
-    const prev = create("button", "zc-nav", "‹");
-    const next = create("button", "zc-nav", "›");
-
-    prev.addEventListener("click", () => {
-      state.date.setMonth(state.date.getMonth() - 1);
+    monthTitle.title = "Click to jump to Today";
+    monthTitle.addEventListener("click", () => {
+      state.viewDate = new Date();
+      state.selectedDate = new Date();
       render();
     });
 
-    next.addEventListener("click", () => {
-      state.date.setMonth(state.date.getMonth() + 1);
+    const navControls = createEl("div", "zc-nav-controls");
+    const prevBtn = createEl("button", "zc-nav-btn", "‹");
+    prevBtn.title = "Previous Month";
+    prevBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      state.viewDate.setMonth(state.viewDate.getMonth() - 1);
       render();
     });
 
-    controls.append(prev, next);
-    header.append(title, controls);
-
-    const weekdays = create("div", "zc-weekdays");
-
-    ["S", "M", "T", "W", "T", "F", "S"].forEach(day => {
-      weekdays.append(
-        create("div", "zc-weekday", day)
-      );
+    const nextBtn = createEl("button", "zc-nav-btn", "›");
+    nextBtn.title = "Next Month";
+    nextBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      state.viewDate.setMonth(state.viewDate.getMonth() + 1);
+      render();
     });
 
-    const grid = create("div", "zc-grid");
+    navControls.append(prevBtn, nextBtn);
+    monthBar.append(monthTitle, navControls);
 
-    const year = state.date.getFullYear();
-    const month = state.date.getMonth();
+    // 2. Weekdays Header
+    const mondayFirst = Prefs.getBool("zen-calendar.monday-start", false);
+    const weekdayLabels = mondayFirst
+      ? ["M", "T", "W", "T", "F", "S", "S"]
+      : ["S", "M", "T", "W", "T", "F", "S"];
 
-    const first = new Date(year, month, 1);
-    const last = new Date(year, month + 1, 0);
+    const weekdaysGrid = createEl("div", "zc-weekdays");
+    weekdayLabels.forEach((label) => {
+      weekdaysGrid.append(createEl("div", "zc-weekday", label));
+    });
 
-    for (let i = 0; i < first.getDay(); i++) {
-      grid.append(create("div", "zc-day empty"));
+    // 3. Days Grid (Full 7x6 / 7x5 month grid with prev & next dates)
+    const daysGrid = createEl("div", "zc-days-grid");
+
+    const year = state.viewDate.getFullYear();
+    const month = state.viewDate.getMonth();
+
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+    const startOffset = mondayFirst
+      ? (firstDayIndex === 0 ? 6 : firstDayIndex - 1)
+      : firstDayIndex;
+
+    // Previous month's trailing days
+    for (let i = startOffset - 1; i >= 0; i--) {
+      const dayNum = daysInPrevMonth - i;
+      const date = new Date(year, month - 1, dayNum);
+      const cell = createDayCell(date, dayNum, true);
+      daysGrid.append(cell);
     }
 
-    for (let day = 1; day <= last.getDate(); day++) {
+    // Current month's days
+    for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
-      const dateKey = key(date);
-
-      const cell = create(
-        "button",
-        "zc-day",
-        day
-      );
-
-      if (
-        date.toDateString() ===
-        new Date().toDateString()
-      ) {
-        cell.classList.add("today");
-      }
-
-      if (
-        date.toDateString() ===
-        state.selected.toDateString()
-      ) {
-        cell.classList.add("selected");
-      }
-
-      if (state.events[dateKey]) {
-        cell.classList.add("has-event");
-
-        const dot = create("span", "zc-event-dot");
-        cell.append(dot);
-      }
-
-      cell.addEventListener("click", () => {
-        state.selected = date;
-        renderAgenda();
-        render();
-      });
-
-      grid.append(cell);
+      const cell = createDayCell(date, day, false);
+      daysGrid.append(cell);
     }
 
-    calendar.append(
-      header,
-      weekdays,
-      grid
-    );
+    // Next month's leading days (fill up to complete row / grid)
+    const totalRendered = startOffset + daysInMonth;
+    const totalCells = totalRendered <= 35 ? 35 : 42;
+    const remainingDays = totalCells - totalRendered;
 
-    renderAgenda();
+    for (let day = 1; day <= remainingDays; day++) {
+      const date = new Date(year, month + 1, day);
+      const cell = createDayCell(date, day, true);
+      daysGrid.append(cell);
+    }
+
+    container.append(monthBar, weekdaysGrid, daysGrid);
   }
 
-  function renderAgenda() {
-    const root = document.getElementById(ID);
+  // Create single day cell in grid
+  function createDayCell(date, dayNum, isOtherMonth) {
+    const cell = createEl("button", "zc-day");
+    const numSpan = createEl("span", "zc-day-num", String(dayNum));
+    cell.append(numSpan);
 
-    if (!root)
-      return;
+    if (isOtherMonth) {
+      cell.classList.add("zc-other-month");
+    }
 
-    const agenda = root.querySelector(".zc-agenda");
+    if (isToday(date)) {
+      cell.classList.add("zc-today");
+    }
 
-    agenda.replaceChildren();
+    if (isSameDay(date, state.selectedDate)) {
+      cell.classList.add("zc-selected");
+    }
 
-    const title = create(
+    const dateKey = formatDateKey(date);
+    const dayEvents = state.events[dateKey] || [];
+
+    if (dayEvents.length > 0) {
+      cell.classList.add("zc-has-events");
+      const dotsContainer = createEl("span", "zc-dots-container");
+      
+      // Render up to 3 dots with their respective colors
+      dayEvents.slice(0, 3).forEach((ev) => {
+        const dot = createEl("span", "zc-event-dot");
+        if (ev.color) {
+          dot.style.backgroundColor = ev.color;
+        }
+        dotsContainer.append(dot);
+      });
+      cell.append(dotsContainer);
+    }
+
+    cell.addEventListener("click", () => {
+      state.selectedDate = date;
+      if (isOtherMonth) {
+        state.viewDate = new Date(date.getFullYear(), date.getMonth(), 1);
+      }
+      render();
+    });
+
+    return cell;
+  }
+
+  // Render Agenda list for selected date
+  function renderAgenda(container) {
+    container.replaceChildren();
+
+    const header = createEl("div", "zc-agenda-header", formatAgendaHeader(state.selectedDate));
+    container.append(header);
+
+    const dateKey = formatDateKey(state.selectedDate);
+    const dayEvents = state.events[dateKey] || [];
+
+    const list = createEl("div", "zc-event-list");
+
+    if (dayEvents.length === 0) {
+      const empty = createEl("div", "zc-empty-agenda", "No events scheduled");
+      list.append(empty);
+    } else {
+      dayEvents.forEach((ev, idx) => {
+        const item = createEl("div", "zc-event-item");
+
+        const dot = createEl("span", "zc-event-dot-indicator");
+        dot.style.backgroundColor = ev.color || "#3b82f6";
+
+        const info = createEl("div", "zc-event-info");
+        const topLine = createEl("div", "zc-event-top-line");
+
+        if (ev.time) {
+          const time = createEl("span", "zc-event-time", ev.time);
+          topLine.append(time);
+        }
+
+        const title = createEl("span", "zc-event-title", ev.text || "Event");
+        topLine.append(title);
+        info.append(topLine);
+
+        if (ev.duration) {
+          const duration = createEl("span", "zc-event-duration", ev.duration);
+          info.append(duration);
+        }
+
+        const removeBtn = createEl("button", "zc-event-delete", "×");
+        removeBtn.title = "Delete event";
+        removeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          state.events[dateKey].splice(idx, 1);
+          if (state.events[dateKey].length === 0) {
+            delete state.events[dateKey];
+          }
+          saveEvents();
+          render();
+        });
+
+        item.append(dot, info, removeBtn);
+        list.append(item);
+      });
+    }
+
+    container.append(list);
+
+    // "+ Add event" button
+    const addBtn = createEl("button", "zc-add-btn");
+    const plusIcon = createEl("span", "zc-add-icon", "+");
+    const addLabel = createEl("span", "zc-add-label", "Add event");
+    addBtn.append(plusIcon, addLabel);
+
+    addBtn.addEventListener("click", () => {
+      state.showModal = true;
+      render();
+    });
+
+    container.append(addBtn);
+  }
+
+  // Render Event Creation Modal Dialog
+  function renderModal(root) {
+    if (!state.showModal) return;
+
+    const overlay = createEl("div", "zc-modal-overlay");
+    const modal = createEl("div", "zc-modal");
+
+    const modalTitle = createEl("div", "zc-modal-title", "Add Event");
+    const dateLabel = createEl(
       "div",
-      "zc-agenda-title",
-      state.selected.toLocaleDateString("default", {
-        weekday: "long",
+      "zc-modal-date",
+      state.selectedDate.toLocaleDateString("default", {
+        weekday: "short",
         month: "short",
         day: "numeric"
       })
     );
 
-    agenda.append(title);
+    // Title input
+    const titleInput = createEl("input", "zc-modal-input");
+    titleInput.type = "text";
+    titleInput.placeholder = "Event title (e.g. Project Review)";
+    titleInput.autofocus = true;
 
-    const dateKey = key(state.selected);
-    const events = state.events[dateKey] || [];
+    // Time & Duration row
+    const timeRow = createEl("div", "zc-modal-row");
+    const timeInput = createEl("input", "zc-modal-input zc-half-input");
+    timeInput.type = "text";
+    timeInput.placeholder = "Time (e.g. 10:00 AM)";
+    timeInput.value = "10:00 AM";
 
-    events.forEach((event, index) => {
-      const item = create("div", "zc-event");
+    const durInput = createEl("input", "zc-modal-input zc-half-input");
+    durInput.type = "text";
+    durInput.placeholder = "Duration (e.g. 1h, 45m)";
+    durInput.value = "1h";
 
-      const dot = create("span", "zc-event-dot");
+    timeRow.append(timeInput, durInput);
 
-      const text = create(
-        "span",
-        "zc-event-text",
-        event
-      );
+    // Color picker row
+    const colorRow = createEl("div", "zc-color-row");
+    const colors = [
+      { name: "blue", hex: "#3b82f6" },
+      { name: "red", hex: "#ef4444" },
+      { name: "green", hex: "#22c55e" },
+      { name: "orange", hex: "#f59e0b" },
+      { name: "purple", hex: "#a855f7" }
+    ];
 
-      const remove = create(
-        "button",
-        "zc-event-remove",
-        "×"
-      );
-
-      remove.addEventListener("click", () => {
-        state.events[dateKey].splice(index, 1);
-
-        if (!state.events[dateKey].length)
-          delete state.events[dateKey];
-
-        saveEvents();
-        render();
+    colors.forEach((c) => {
+      const colorBtn = createEl("button", "zc-color-choice");
+      colorBtn.style.backgroundColor = c.hex;
+      if (state.selectedColor === c.hex) {
+        colorBtn.classList.add("zc-color-active");
+      }
+      colorBtn.addEventListener("click", () => {
+        state.selectedColor = c.hex;
+        modal.querySelectorAll(".zc-color-choice").forEach((b) => b.classList.remove("zc-color-active"));
+        colorBtn.classList.add("zc-color-active");
       });
-
-      item.append(
-        dot,
-        text,
-        remove
-      );
-
-      agenda.append(item);
+      colorRow.append(colorBtn);
     });
 
-    const add = create(
-      "button",
-      "zc-add",
-      "+ Add event"
-    );
-
-    add.addEventListener("click", () => {
-      const event = prompt(
-        "Event name"
-      );
-
-      if (!event)
-        return;
-
-      if (!state.events[dateKey])
-        state.events[dateKey] = [];
-
-      state.events[dateKey].push(event);
-
-      saveEvents();
+    // Actions row
+    const actionsRow = createEl("div", "zc-modal-actions");
+    const cancelBtn = createEl("button", "zc-btn zc-btn-secondary", "Cancel");
+    cancelBtn.addEventListener("click", () => {
+      state.showModal = false;
       render();
     });
 
-    agenda.append(add);
-  }
+    const saveBtn = createEl("button", "zc-btn zc-btn-primary", "Save Event");
+    const submit = () => {
+      const text = titleInput.value.trim();
+      if (!text) return;
 
-  function createUI() {
-    const sidebar =
-      document.querySelector("#zen-sidebar-tabs");
+      const dateKey = formatDateKey(state.selectedDate);
+      if (!state.events[dateKey]) {
+        state.events[dateKey] = [];
+      }
 
-    if (!sidebar)
-      return false;
+      state.events[dateKey].push({
+        id: "ev_" + Date.now(),
+        text: text,
+        time: timeInput.value.trim(),
+        duration: durInput.value.trim(),
+        color: state.selectedColor
+      });
 
-    const existing =
-      document.getElementById(ID);
+      saveEvents();
+      state.showModal = false;
+      render();
+    };
 
-    if (existing)
-      return true;
-
-    const root = create(
-      "div",
-      "",
-    );
-
-    root.id = ID;
-
-    const button = create(
-      "button",
-      "zc-toggle"
-    );
-
-    const arrow = create(
-      "span",
-      "zc-arrow",
-      "›"
-    );
-
-    const icon = create(
-      "span",
-      "zc-icon",
-      "▦"
-    );
-
-    const label = create(
-      "span",
-      "zc-label",
-      "Calendar"
-    );
-
-    button.append(
-      arrow,
-      icon,
-      label
-    );
-
-    const content = create(
-      "div",
-      "zc-content"
-    );
-
-    const calendar = create(
-      "div",
-      "zc-calendar"
-    );
-
-    const agenda = create(
-      "div",
-      "zc-agenda"
-    );
-
-    content.append(
-      calendar,
-      agenda
-    );
-
-    root.append(
-      button,
-      content
-    );
-
-    button.addEventListener("click", () => {
-      root.classList.toggle("expanded");
+    saveBtn.addEventListener("click", submit);
+    titleInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") submit();
+      if (e.key === "Escape") {
+        state.showModal = false;
+        render();
+      }
     });
 
-    sidebar.parentElement.append(root);
+    actionsRow.append(cancelBtn, saveBtn);
+
+    modal.append(modalTitle, dateLabel, titleInput, timeRow, colorRow, actionsRow);
+    overlay.append(modal);
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        state.showModal = false;
+        render();
+      }
+    });
+
+    root.append(overlay);
+    setTimeout(() => titleInput.focus(), 50);
+  }
+
+  // Render More Options Menu
+  function renderMenu(root) {
+    if (!state.showMenu) return;
+
+    const menu = createEl("div", "zc-dropdown-menu");
+
+    const todayOpt = createEl("button", "zc-menu-item", "Jump to Today");
+    todayOpt.addEventListener("click", () => {
+      state.viewDate = new Date();
+      state.selectedDate = new Date();
+      state.showMenu = false;
+      render();
+    });
+
+    const addOpt = createEl("button", "zc-menu-item", "Add Event...");
+    addOpt.addEventListener("click", () => {
+      state.showMenu = false;
+      state.showModal = true;
+      render();
+    });
+
+    const clearOpt = createEl("button", "zc-menu-item zc-menu-danger", "Clear Today's Events");
+    clearOpt.addEventListener("click", () => {
+      const dateKey = formatDateKey(state.selectedDate);
+      if (state.events[dateKey]) {
+        delete state.events[dateKey];
+        saveEvents();
+      }
+      state.showMenu = false;
+      render();
+    });
+
+    menu.append(todayOpt, addOpt, clearOpt);
+    root.append(menu);
+
+    // Close menu when clicking outside
+    const closeListener = (e) => {
+      if (!menu.contains(e.target) && !e.target.closest(".zc-header-more-btn")) {
+        state.showMenu = false;
+        document.removeEventListener("click", closeListener);
+        render();
+      }
+    };
+    setTimeout(() => document.addEventListener("click", closeListener), 10);
+  }
+
+  // Main Render Function
+  function render() {
+    const root = document.getElementById(ID);
+    if (!root) return;
+
+    root.replaceChildren();
+
+    // 1. Top Widget Header (Calendar ... )
+    const widgetHeader = createEl("div", "zc-widget-header");
+    const widgetTitle = createEl("div", "zc-widget-title", "Calendar");
+
+    const moreBtn = createEl("button", "zc-header-more-btn", "···");
+    moreBtn.title = "Calendar Options";
+    moreBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      state.showMenu = !state.showMenu;
+      render();
+    });
+
+    widgetHeader.append(widgetTitle, moreBtn);
+    root.append(widgetHeader);
+
+    // 2. Calendar Month & Grid Container
+    const calendarContainer = createEl("div", "zc-calendar-container");
+    renderCalendar(calendarContainer);
+    root.append(calendarContainer);
+
+    // 3. Agenda Section
+    const showAgenda = Prefs.getBool("zen-calendar.show-agenda", true);
+    if (showAgenda) {
+      const agendaContainer = createEl("div", "zc-agenda-container");
+      renderAgenda(agendaContainer);
+      root.append(agendaContainer);
+    }
+
+    // 4. Modals & Menus
+    renderMenu(root);
+    renderModal(root);
+  }
+
+  // DOM Insertion & Initialization
+  function createUI() {
+    if (document.getElementById(ID)) return true;
+
+    // Search for ideal insertion targets in Zen Browser sidebar hierarchy
+    // Priority:
+    // 1. After workspace indicator
+    // 2. Before vertical tabs list / wrapper
+    // 3. After essentials
+    // 4. Inside sidebar box
+    const workspaceIndicator = document.querySelector(
+      "#zen-current-workspace-indicator, #zen-workspaces-button, .zen-workspace-indicator"
+    );
+    const tabsWrapper = document.querySelector(
+      "#zen-sidebar-tabs-wrapper, #zen-sidebar-tabs, #vertical-tabs-box, #tabbrowser-tabs"
+    );
+    const essentials = document.querySelector("#zen-essentials, #zen-sidebar-top-buttons");
+    const sidebar = document.querySelector("#zen-sidebar, #sidebar-box, #navigator-toolbox");
+
+    let targetParent = null;
+    let nextSibling = null;
+
+    if (workspaceIndicator && workspaceIndicator.parentElement) {
+      targetParent = workspaceIndicator.parentElement;
+      nextSibling = workspaceIndicator.nextElementSibling;
+    } else if (tabsWrapper && tabsWrapper.parentElement) {
+      targetParent = tabsWrapper.parentElement;
+      nextSibling = tabsWrapper;
+    } else if (essentials && essentials.parentElement) {
+      targetParent = essentials.parentElement;
+      nextSibling = essentials.nextElementSibling;
+    } else if (sidebar) {
+      targetParent = sidebar;
+      nextSibling = null;
+    }
+
+    if (!targetParent) return false;
+
+    const root = createEl("div", "");
+    root.id = ID;
+
+    if (nextSibling) {
+      targetParent.insertBefore(root, nextSibling);
+    } else {
+      targetParent.append(root);
+    }
 
     render();
-
     return true;
   }
 
   function init() {
-    if (createUI())
-      return;
+    if (createUI()) return;
 
-    const observer =
-      new MutationObserver(() => {
-        if (createUI())
-          observer.disconnect();
-      });
-
-    observer.observe(
-      document.documentElement,
-      {
-        childList: true,
-        subtree: true
+    // Observe DOM mutations until sidebar is fully mounted
+    const observer = new MutationObserver(() => {
+      if (createUI()) {
+        observer.disconnect();
       }
-    );
+    });
+
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true
+    });
   }
 
+  // Start initialization
   if (
-    location.href ===
-    "chrome://browser/content/browser.xhtml"
+    document.readyState === "complete" ||
+    document.readyState === "interactive"
   ) {
     init();
+  } else {
+    window.addEventListener("DOMContentLoaded", init, { once: true });
   }
 })();

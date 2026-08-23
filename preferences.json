@@ -1,0 +1,70 @@
+[
+  {
+    "property": "zen-calendar.enabled",
+    "label": "Enable Calendar",
+    "type": "checkbox",
+    "defaultValue": true
+  },
+  {
+    "property": "zen-calendar.start-expanded",
+    "label": "Start Expanded",
+    "type": "checkbox",
+    "defaultValue": false
+  },
+  {
+    "property": "zen-calendar.show-agenda",
+    "label": "Show Agenda",
+    "type": "checkbox",
+    "defaultValue": true
+  },
+  {
+    "property": "zen-calendar.show-event-dots",
+    "label": "Show Event Dots",
+    "type": "checkbox",
+    "defaultValue": true
+  },
+  {
+    "property": "zen-calendar.monday-start",
+    "label": "Monday First",
+    "type": "checkbox",
+    "defaultValue": false
+  },
+  {
+    "property": "zen-calendar.compact",
+    "label": "Compact Calendar",
+    "type": "checkbox",
+    "defaultValue": false
+  },
+  {
+    "property": "zen-calendar.accent",
+    "label": "Accent Color",
+    "type": "dropdown",
+    "defaultValue": "blue",
+    "options": [
+      {
+        "label": "Blue",
+        "value": "blue"
+      },
+      {
+        "label": "Purple",
+        "value": "purple"
+      },
+      {
+        "label": "Green",
+        "value": "green"
+      },
+      {
+        "label": "Orange",
+        "value": "orange"
+      },
+      {
+        "label": "Red",
+        "value": "red"
+      },
+      {
+        "label": "White",
+        "value": "white"
+      }
+    ]
+  }
+]
