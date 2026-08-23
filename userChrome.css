@@ -1,0 +1,343 @@
+/* =========================================
+   ZEN CALENDAR
+   ========================================= */
+
+#zen-calendar-mod {
+  width: 100%;
+  margin-top: 6px;
+  padding: 0 8px;
+  box-sizing: border-box;
+
+  font-family: -apple-system, BlinkMacSystemFont,
+    "SF Pro Display", "Segoe UI", sans-serif;
+
+  color: var(--toolbar-color, #e8eaed);
+}
+
+/* ---------- Toggle ---------- */
+
+#zen-calendar-mod .zc-toggle {
+  width: 100%;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+
+  border: 0;
+  border-radius: 10px;
+
+  padding: 0 12px;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  color: inherit;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+#zen-calendar-mod .zc-toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+#zen-calendar-mod .zc-arrow {
+  width: 18px;
+
+  font-size: 22px;
+
+  transition:
+    transform 0.2s ease;
+}
+
+#zen-calendar-mod .zc-icon {
+  width: 22px;
+
+  font-size: 15px;
+
+  opacity: 0.75;
+}
+
+#zen-calendar-mod .zc-label {
+  margin-left: 7px;
+
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ---------- Expand ---------- */
+
+#zen-calendar-mod .zc-content {
+  display: none;
+
+  margin-top: 6px;
+
+  padding: 10px;
+
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.045);
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  box-sizing: border-box;
+}
+
+#zen-calendar-mod.expanded .zc-content {
+  display: block;
+}
+
+#zen-calendar-mod.expanded .zc-arrow {
+  transform: rotate(90deg);
+}
+
+/* ---------- Calendar header ---------- */
+
+#zen-calendar-mod .zc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 10px;
+}
+
+#zen-calendar-mod .zc-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+#zen-calendar-mod .zc-controls {
+  display: flex;
+  gap: 2px;
+}
+
+#zen-calendar-mod .zc-nav {
+  width: 26px;
+  height: 26px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: inherit;
+
+  font-size: 19px;
+
+  cursor: pointer;
+}
+
+#zen-calendar-mod .zc-nav:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+/* ---------- Weekdays ---------- */
+
+#zen-calendar-mod .zc-weekdays,
+#zen-calendar-mod .zc-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(7, minmax(0, 1fr));
+
+  gap: 2px;
+}
+
+#zen-calendar-mod .zc-weekday {
+  text-align: center;
+
+  font-size: 9px;
+
+  opacity: 0.45;
+
+  padding-bottom: 5px;
+}
+
+/* ---------- Days ---------- */
+
+#zen-calendar-mod .zc-day {
+  position: relative;
+
+  min-width: 0;
+  aspect-ratio: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: inherit;
+
+  font-size: 10px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.12s ease,
+    transform 0.12s ease;
+}
+
+#zen-calendar-mod .zc-day:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+#zen-calendar-mod .zc-day.empty {
+  pointer-events: none;
+}
+
+#zen-calendar-mod .zc-day.today {
+  box-shadow:
+    inset 0 0 0 1px
+    rgba(255, 255, 255, 0.3);
+}
+
+#zen-calendar-mod .zc-day.selected {
+  background: #ffffff;
+  color: #111111;
+}
+
+#zen-calendar-mod .zc-day.selected:hover {
+  background: #ffffff;
+}
+
+/* ---------- Event dot ---------- */
+
+#zen-calendar-mod .zc-event-dot {
+  position: absolute;
+
+  width: 4px;
+  height: 4px;
+
+  border-radius: 50%;
+
+  background: #6ea8ff;
+
+  bottom: 3px;
+  left: 50%;
+
+  transform: translateX(-50%);
+}
+
+#zen-calendar-mod .zc-day.selected
+.zc-event-dot {
+  background: #111111;
+}
+
+/* ---------- Agenda ---------- */
+
+#zen-calendar-mod .zc-agenda {
+  margin-top: 12px;
+
+  padding-top: 10px;
+
+  border-top:
+    1px solid
+    rgba(255, 255, 255, 0.07);
+}
+
+#zen-calendar-mod .zc-agenda-title {
+  margin-bottom: 7px;
+
+  font-size: 10px;
+
+  opacity: 0.55;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.04em;
+}
+
+#zen-calendar-mod .zc-event {
+  display: flex;
+  align-items: center;
+
+  min-height: 28px;
+
+  padding: 3px 4px;
+
+  border-radius: 7px;
+}
+
+#zen-calendar-mod .zc-event:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+#zen-calendar-mod .zc-event
+.zc-event-dot {
+  position: static;
+
+  flex-shrink: 0;
+
+  width: 5px;
+  height: 5px;
+
+  margin-right: 7px;
+
+  transform: none;
+}
+
+#zen-calendar-mod .zc-event-text {
+  flex: 1;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 10px;
+}
+
+#zen-calendar-mod .zc-event-remove {
+  border: 0;
+
+  background: transparent;
+
+  color: inherit;
+
+  opacity: 0;
+
+  cursor: pointer;
+}
+
+#zen-calendar-mod .zc-event:hover
+.zc-event-remove {
+  opacity: 0.5;
+}
+
+/* ---------- Add ---------- */
+
+#zen-calendar-mod .zc-add {
+  width: 100%;
+
+  margin-top: 6px;
+  padding: 6px;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: rgba(255, 255, 255, 0.05);
+
+  color: inherit;
+
+  font-size: 10px;
+
+  cursor: pointer;
+}
+
+#zen-calendar-mod .zc-add:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+/* ---------- Compact sidebar ---------- */
+
+:root[zen-sidebar-collapsed="true"]
+#zen-calendar-mod {
+  display: none;
+}

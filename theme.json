@@ -1,0 +1,31 @@
+{
+  "id": "ZenCalendar",
+  "homepage": "https://github.com/noobcoder1982/zen-calendar",
+  "author": "Abh1jeet",
+  "name": "Zen Calendar",
+  "description": "Adds an interactive calendar to the Zen Browser sidebar.",
+  "version": "1.0.0",
+  "createdAt": "2026-08-23",
+  "updatedAt": "2026-08-23",
+  "style": {
+    "chrome": "userChrome.css"
+  },
+  "scripts": {
+    "calendar.uc.js": {
+      "name": "Zen Calendar",
+      "description": "Interactive sidebar calendar.",
+      "include": [
+        "chrome://browser/content/browser.xhtml"
+      ]
+    }
+  },
+  "tags": [
+    "zen",
+    "calendar",
+    "sidebar",
+    "productivity"
+  ],
+  "fork": [
+    "zen"
+  ]
+}
