@@ -616,3 +616,282 @@
 :root[zen-compact-mode="true"] #zen-calendar-mod {
   display: none;
 }
+/* =========================================
+   THEME INTEGRATION
+   Arc 2.0 + Wireframe 2.0
+   ========================================= */
+
+#zen-calendar-mod {
+  --zc-text: var(
+    --na-color-text,
+    var(--toolbar-color, #e5e7eb)
+  );
+
+  --zc-text-muted: var(
+    --na-color-text-second,
+    rgba(156, 163, 175, 0.7)
+  );
+
+  --zc-bg: var(
+    --na-color-bg-second,
+    var(--zen-colors-tertiary, rgba(255, 255, 255, 0.025))
+  );
+
+  --zc-border: var(
+    --na-color-border,
+    var(--zen-colors-border, rgba(255, 255, 255, 0.06))
+  );
+
+  --zc-hover: var(
+    --zen-colors-tertiary,
+    rgba(255, 255, 255, 0.06)
+  );
+
+  --zc-accent: var(
+    --zen-primary-color,
+    var(--zen-colors-primary, #3b82f6)
+  );
+
+  --zc-radius: var(
+    --arc-border-radius,
+    var(
+      --na-user-border-radius,
+      var(--zen-border-radius, 8px)
+    )
+  );
+
+  color: var(--zc-text);
+}
+
+/* =========================================
+   CALENDAR MAIN CONTAINER
+   ========================================= */
+
+#zen-calendar-mod .zc-content {
+  background: var(--zc-bg) !important;
+  border-color: var(--zc-border) !important;
+  border-radius: var(--zc-radius) !important;
+}
+
+/* =========================================
+   CALENDAR HEADER
+   ========================================= */
+
+#zen-calendar-mod .zc-label,
+#zen-calendar-mod .zc-month-title {
+  color: var(--zc-text) !important;
+}
+
+#zen-calendar-mod .zc-chevron,
+#zen-calendar-mod .zc-header-more-btn,
+#zen-calendar-mod .zc-nav-btn {
+  color: var(--zc-text-muted) !important;
+}
+
+#zen-calendar-mod .zc-header-more-btn:hover,
+#zen-calendar-mod .zc-nav-btn:hover {
+  background: var(--zc-hover) !important;
+  color: var(--zc-text) !important;
+}
+
+/* =========================================
+   WEEKDAYS
+   ========================================= */
+
+#zen-calendar-mod .zc-weekday {
+  color: var(--zc-text-muted) !important;
+}
+
+/* =========================================
+   DAYS
+   ========================================= */
+
+#zen-calendar-mod .zc-day {
+  color: var(--zc-text) !important;
+}
+
+#zen-calendar-mod .zc-day:hover {
+  background: var(--zc-hover) !important;
+  color: var(--zc-text) !important;
+}
+
+/* Other-month dates */
+
+#zen-calendar-mod .zc-day.zc-other-month {
+  color: var(--zc-text-muted) !important;
+}
+
+/* =========================================
+   TODAY
+   ========================================= */
+
+#zen-calendar-mod .zc-day.zc-today {
+  background: var(--zc-accent) !important;
+
+  color: var(
+    --zen-primary-color-text,
+    #ffffff
+  ) !important;
+
+  box-shadow:
+    0 0 8px
+    color-mix(
+      in srgb,
+      var(--zc-accent) 45%,
+      transparent
+    ) !important;
+}
+
+/* =========================================
+   SELECTED DATE
+   ========================================= */
+
+#zen-calendar-mod
+.zc-day.zc-selected:not(.zc-today) {
+  background: var(--zc-hover) !important;
+  border-color: var(--zc-border) !important;
+  color: var(--zc-text) !important;
+}
+
+/* =========================================
+   EVENT DOTS
+   ========================================= */
+
+#zen-calendar-mod .zc-event-dot {
+  background: var(--zc-accent) !important;
+}
+
+#zen-calendar-mod
+.zc-day.zc-today
+.zc-event-dot {
+  background:
+    var(--zen-primary-color-text, #ffffff)
+    !important;
+}
+
+/* =========================================
+   AGENDA
+   ========================================= */
+
+#zen-calendar-mod .zc-agenda-container {
+  border-color: var(--zc-border) !important;
+}
+
+#zen-calendar-mod .zc-agenda-header {
+  color: var(--zc-accent) !important;
+}
+
+#zen-calendar-mod .zc-empty-agenda {
+  color: var(--zc-text-muted) !important;
+}
+
+#zen-calendar-mod .zc-event-item {
+  color: var(--zc-text);
+}
+
+#zen-calendar-mod .zc-event-item:hover {
+  background: var(--zc-hover) !important;
+}
+
+#zen-calendar-mod .zc-event-time,
+#zen-calendar-mod .zc-event-duration {
+  color: var(--zc-text-muted) !important;
+}
+
+#zen-calendar-mod .zc-event-title {
+  color: var(--zc-text) !important;
+}
+
+/* =========================================
+   ADD EVENT
+   ========================================= */
+
+#zen-calendar-mod .zc-add-btn {
+  color: var(--zc-accent) !important;
+}
+
+#zen-calendar-mod .zc-add-btn:hover {
+  background: var(--zc-hover) !important;
+}
+
+/* =========================================
+   DROPDOWN
+   ========================================= */
+
+#zen-calendar-mod .zc-dropdown-menu {
+  background:
+    var(
+      --na-color-bg,
+      rgba(26, 26, 30, 0.95)
+    ) !important;
+
+  border-color: var(--zc-border) !important;
+
+  border-radius: var(--zc-radius) !important;
+}
+
+#zen-calendar-mod .zc-menu-item {
+  color: var(--zc-text) !important;
+}
+
+#zen-calendar-mod .zc-menu-item:hover {
+  background: var(--zc-hover) !important;
+}
+
+/* =========================================
+   MODAL
+   ========================================= */
+
+#zen-calendar-mod .zc-modal {
+  background:
+    var(
+      --na-color-bg,
+      rgba(24, 24, 28, 0.96)
+    ) !important;
+
+  border-color: var(--zc-border) !important;
+
+  border-radius: var(--zc-radius) !important;
+}
+
+#zen-calendar-mod .zc-modal-title {
+  color: var(--zc-text) !important;
+}
+
+#zen-calendar-mod .zc-modal-date {
+  color: var(--zc-accent) !important;
+}
+
+#zen-calendar-mod .zc-modal-input {
+  background: var(--zc-hover) !important;
+  border-color: var(--zc-border) !important;
+  color: var(--zc-text) !important;
+}
+
+#zen-calendar-mod .zc-modal-input:focus {
+  border-color: var(--zc-accent) !important;
+}
+
+/* =========================================
+   MODAL BUTTONS
+   ========================================= */
+
+#zen-calendar-mod .zc-btn-secondary {
+  background: var(--zc-hover) !important;
+  color: var(--zc-text-muted) !important;
+}
+
+#zen-calendar-mod .zc-btn-secondary:hover {
+  background: var(--zc-hover) !important;
+  color: var(--zc-text) !important;
+}
+
+#zen-calendar-mod .zc-btn-primary {
+  background: var(--zc-accent) !important;
+
+  color:
+    var(
+      --zen-primary-color-text,
+      #ffffff
+    ) !important;
+}
