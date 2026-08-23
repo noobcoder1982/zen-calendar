@@ -544,10 +544,10 @@
     const toggleBtn = createEl("div", "zc-toggle");
     const toggleLeft = createEl("div", "zc-toggle-left");
     
-    // Add current date highlight
+    // Add current date highlight (Premium Pill Badge Style)
     const todayStr = new Date().toLocaleDateString("default", { month: "short", day: "numeric" });
     const label = createEl("span", "zc-label");
-    label.innerHTML = `Calendar <span class="zc-header-date" style="color: var(--zc-accent); font-weight: 600; font-size: 10.5px; opacity: 0.9; margin-left: 6px;">· ${todayStr}</span>`;
+    label.innerHTML = `Calendar <span class="zc-header-date" style="display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--zc-accent) 15%, transparent); color: var(--zc-accent); font-size: 9.5px; font-weight: 650; text-transform: uppercase; letter-spacing: 0.04em; padding: 3px 6px; border-radius: 5px; margin-left: 8px; line-height: 1;">${todayStr}</span>`;
     
     toggleLeft.append(label);
 
