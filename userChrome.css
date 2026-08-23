@@ -17,6 +17,19 @@
   -moz-window-dragging: no-drag;
 }
 
+/* ---------- Global button resets inside widget ---------- */
+#zen-calendar-mod button,
+#zen-calendar-mod input {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  margin: 0;
+  padding: 0;
+  color: inherit;
+  font-family: inherit;
+}
+
 /* ---------- Toggle Button (Space Tab Style) ---------- */
 
 #zen-calendar-mod .zc-toggle {
@@ -27,14 +40,14 @@
   justify-content: space-between;
   padding: 0 10px;
   box-sizing: border-box;
-  border-radius: 8px;
+  border-radius: var(--zen-border-radius, 8px);
   cursor: pointer;
   background: transparent;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 #zen-calendar-mod .zc-toggle:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--zen-colors-tertiary, rgba(255, 255, 255, 0.06)) !important;
 }
 
 #zen-calendar-mod .zc-toggle-left {
@@ -72,19 +85,22 @@
 }
 
 #zen-calendar-mod .zc-header-more-btn {
-  background: transparent;
-  border: none;
+  background: transparent !important;
+  border: none !important;
   color: #9ca3af;
   font-size: 15px;
   line-height: 1;
   cursor: pointer;
-  padding: 2px 6px;
+  padding: 2px 6px !important;
   border-radius: 4px;
   transition: background 0.15s ease, color 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #zen-calendar-mod .zc-header-more-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--zen-colors-tertiary, rgba(255, 255, 255, 0.1)) !important;
   color: #ffffff;
 }
 
@@ -94,9 +110,9 @@
   display: none;
   margin-top: 4px;
   padding: 10px 10px 12px 10px;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
+  background: var(--zen-colors-tertiary, rgba(255, 255, 255, 0.025));
+  border: 1px solid var(--zen-colors-border, rgba(255, 255, 255, 0.06)) !important;
+  border-radius: var(--zen-border-radius, 12px);
   backdrop-filter: blur(12px);
   box-sizing: border-box;
 }
@@ -115,20 +131,20 @@
 }
 
 #zen-calendar-mod .zc-month-title {
-  background: transparent;
-  border: none;
+  background: transparent !important;
+  border: none !important;
   color: #e5e7eb;
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
-  padding: 2px 4px;
+  padding: 2px 6px !important;
   border-radius: 4px;
   font-family: inherit;
   transition: background 0.12s ease;
 }
 
 #zen-calendar-mod .zc-month-title:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--zen-colors-tertiary, rgba(255, 255, 255, 0.08)) !important;
 }
 
 #zen-calendar-mod .zc-nav-controls {
@@ -137,14 +153,14 @@
 }
 
 #zen-calendar-mod .zc-nav-btn {
-  width: 22px;
-  height: 22px;
-  border: none;
+  width: 22px !important;
+  height: 22px !important;
+  border: none !important;
   border-radius: 5px;
-  background: transparent;
+  background: transparent !important;
   color: #9ca3af;
   font-size: 15px;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -155,7 +171,7 @@
 }
 
 #zen-calendar-mod .zc-nav-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--zen-colors-tertiary, rgba(255, 255, 255, 0.1)) !important;
   color: #ffffff;
 }
 
@@ -189,8 +205,8 @@
 #zen-calendar-mod .zc-day {
   position: relative;
   aspect-ratio: 1;
-  border: none;
-  background: transparent;
+  border: none !important;
+  background: transparent !important;
   color: #d1d5db;
   font-size: 11px;
   font-weight: 400;
@@ -207,7 +223,7 @@
 }
 
 #zen-calendar-mod .zc-day:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--zen-colors-tertiary, rgba(255, 255, 255, 0.08)) !important;
   color: #ffffff;
 }
 
@@ -221,25 +237,26 @@
   opacity: 0.9;
 }
 
-/* Today highlighted */
+/* Today highlighted with active theme accent color */
 #zen-calendar-mod .zc-day.zc-today {
-  background: #2563eb !important;
-  color: #ffffff !important;
-  font-weight: 600;
-  border-radius: 50%;
-  box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
+  background: var(--zen-primary-color, var(--zen-colors-primary, #2563eb)) !important;
+  color: var(--zen-primary-color-text, #ffffff) !important;
+  font-weight: 600 !important;
+  border-radius: 50% !important;
+  border: none !important;
+  box-shadow: 0 0 8px var(--zen-primary-color, rgba(37, 99, 235, 0.4)) !important;
 }
 
 /* Selected day */
 #zen-calendar-mod .zc-day.zc-selected:not(.zc-today) {
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  font-weight: 500;
+  border: 1px solid var(--zen-colors-border, rgba(255, 255, 255, 0.45)) !important;
+  border-radius: 6px !important;
+  background: var(--zen-colors-tertiary, rgba(255, 255, 255, 0.06)) !important;
+  font-weight: 500 !important;
 }
 
 #zen-calendar-mod .zc-day.zc-selected.zc-today {
-  outline: 1.5px solid rgba(255, 255, 255, 0.8);
+  outline: 1.5px solid var(--zen-primary-color-text, #ffffff) !important;
   outline-offset: 1px;
 }
 
@@ -261,11 +278,11 @@
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: var(--zen-primary-color, var(--zen-colors-primary, #3b82f6));
 }
 
 #zen-calendar-mod .zc-day.zc-today .zc-event-dot {
-  background: #ffffff !important;
+  background: var(--zen-primary-color-text, #ffffff) !important;
 }
 
 /* ---------- Agenda Section ---------- */
@@ -273,13 +290,13 @@
 #zen-calendar-mod .zc-agenda-container {
   margin-top: 10px;
   padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--zen-colors-border, rgba(255, 255, 255, 0.06)) !important;
 }
 
 #zen-calendar-mod .zc-agenda-header {
   font-size: 11px;
   font-weight: 600;
-  color: #38bdf8;
+  color: var(--zen-primary-color, var(--zen-colors-primary, #38bdf8));
   margin-bottom: 6px;
   letter-spacing: -0.01em;
 }
@@ -307,7 +324,7 @@
 }
 
 #zen-calendar-mod .zc-event-item:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--zen-colors-tertiary, rgba(255, 255, 255, 0.04)) !important;
 }
 
 #zen-calendar-mod .zc-event-dot-indicator {
@@ -360,17 +377,20 @@
 
 #zen-calendar-mod .zc-event-delete {
   opacity: 0;
-  border: none;
-  background: transparent;
+  border: none !important;
+  background: transparent !important;
   color: #9ca3af;
   font-size: 13px;
   line-height: 1;
   cursor: pointer;
-  padding: 0 4px;
+  padding: 0 4px !important;
   border-radius: 3px;
   align-self: center;
   margin-left: 4px;
   transition: opacity 0.15s ease, color 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #zen-calendar-mod .zc-event-item:hover .zc-event-delete {
@@ -380,7 +400,7 @@
 #zen-calendar-mod .zc-event-delete:hover {
   opacity: 1 !important;
   color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.1) !important;
 }
 
 /* ---------- Add Event Button ---------- */
@@ -390,10 +410,10 @@
   align-items: center;
   gap: 4px;
   margin-top: 6px;
-  padding: 4px 6px;
-  border: none;
-  background: transparent;
-  color: #38bdf8;
+  padding: 4px 6px !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--zen-primary-color, var(--zen-colors-primary, #38bdf8));
   font-size: 11px;
   font-weight: 500;
   border-radius: 5px;
@@ -403,7 +423,7 @@
 }
 
 #zen-calendar-mod .zc-add-btn:hover {
-  background: rgba(56, 189, 248, 0.12);
+  background: var(--zen-colors-tertiary, rgba(56, 189, 248, 0.12)) !important;
 }
 
 #zen-calendar-mod .zc-add-icon {
@@ -420,8 +440,8 @@
   right: 10px;
   background: rgba(26, 26, 30, 0.95);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border: 1px solid var(--zen-colors-border, rgba(255, 255, 255, 0.1)) !important;
+  border-radius: var(--zen-border-radius, 8px);
   padding: 4px;
   display: flex;
   flex-direction: column;
@@ -432,12 +452,12 @@
 }
 
 #zen-calendar-mod .zc-menu-item {
-  border: none;
-  background: transparent;
+  border: none !important;
+  background: transparent !important;
   color: #d1d5db;
   font-size: 10.5px;
   text-align: left;
-  padding: 5px 8px;
+  padding: 5px 8px !important;
   border-radius: 4px;
   cursor: pointer;
   font-family: inherit;
@@ -445,7 +465,7 @@
 }
 
 #zen-calendar-mod .zc-menu-item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--zen-colors-tertiary, rgba(255, 255, 255, 0.08)) !important;
   color: #ffffff;
 }
 
@@ -469,15 +489,15 @@
   align-items: center;
   justify-content: center;
   z-index: 200;
-  border-radius: 12px;
+  border-radius: var(--zen-border-radius, 12px);
   padding: 8px;
   box-sizing: border-box;
 }
 
 #zen-calendar-mod .zc-modal {
   background: rgba(24, 24, 28, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
+  border: 1px solid var(--zen-colors-border, rgba(255, 255, 255, 0.12)) !important;
+  border-radius: var(--zen-border-radius, 10px);
   padding: 12px;
   width: 100%;
   box-sizing: border-box;
@@ -495,16 +515,16 @@
 
 #zen-calendar-mod .zc-modal-date {
   font-size: 10px;
-  color: #38bdf8;
+  color: var(--zen-primary-color, var(--zen-colors-primary, #38bdf8));
   font-weight: 500;
   margin-top: -4px;
 }
 
 #zen-calendar-mod .zc-modal-input {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--zen-colors-tertiary, rgba(255, 255, 255, 0.06)) !important;
+  border: 1px solid var(--zen-colors-border, rgba(255, 255, 255, 0.1)) !important;
   border-radius: 6px;
-  padding: 6px 8px;
+  padding: 6px 8px !important;
   font-size: 10.5px;
   color: #ffffff;
   outline: none;
@@ -513,8 +533,8 @@
 }
 
 #zen-calendar-mod .zc-modal-input:focus {
-  border-color: #38bdf8;
-  background: rgba(255, 255, 255, 0.09);
+  border-color: var(--zen-primary-color, #38bdf8) !important;
+  background: var(--zen-colors-tertiary, rgba(255, 255, 255, 0.09)) !important;
 }
 
 #zen-calendar-mod .zc-modal-row {
@@ -537,7 +557,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 2px solid transparent;
+  border: 2px solid transparent !important;
   cursor: pointer;
   padding: 0;
   transition: transform 0.12s ease;
@@ -560,9 +580,9 @@
 }
 
 #zen-calendar-mod .zc-btn {
-  border: none;
+  border: none !important;
   border-radius: 5px;
-  padding: 4px 10px;
+  padding: 4px 10px !important;
   font-size: 10.5px;
   font-weight: 500;
   cursor: pointer;
@@ -571,22 +591,23 @@
 }
 
 #zen-calendar-mod .zc-btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--zen-colors-tertiary, rgba(255, 255, 255, 0.08)) !important;
   color: #9ca3af;
 }
 
 #zen-calendar-mod .zc-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--zen-colors-tertiary, rgba(255, 255, 255, 0.12)) !important;
   color: #ffffff;
 }
 
 #zen-calendar-mod .zc-btn-primary {
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--zen-primary-color, var(--zen-colors-primary, #2563eb)) !important;
+  color: var(--zen-primary-color-text, #ffffff) !important;
 }
 
 #zen-calendar-mod .zc-btn-primary:hover {
-  background: #1d4ed8;
+  background: var(--zen-primary-color, #1d4ed8) !important;
+  filter: brightness(0.9);
 }
 
 /* ---------- Compact & Collapsed Sidebar Support ---------- */
