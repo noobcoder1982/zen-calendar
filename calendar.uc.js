@@ -231,9 +231,9 @@
       daysGrid.append(cell);
     }
 
-    // Next month's leading days (fill up to complete row / grid)
+    // Next month's leading days (fill up to complete 6-row grid)
     const totalRendered = startOffset + daysInMonth;
-    const totalCells = totalRendered <= 35 ? 35 : 42;
+    const totalCells = 42; // Always render 6 rows so height never jumps
     const remainingDays = totalCells - totalRendered;
 
     for (let day = 1; day <= remainingDays; day++) {
