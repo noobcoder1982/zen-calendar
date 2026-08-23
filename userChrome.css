@@ -258,14 +258,18 @@
   color: var(--zc-text-muted) !important;
 }
 
-/* Today highlighted with a minimal outline and light background */
+/* Today highlighted with a solid accent background */
 #zen-calendar-mod .zc-day.zc-today {
-  border: 1.5px solid var(--zc-accent) !important;
-  background: var(--zc-hover) !important;
-  color: var(--zc-text) !important;
+  background: var(--zc-accent) !important;
+  color: var(--zen-primary-color-text, #ffffff) !important;
   font-weight: 600 !important;
   border-radius: 50% !important;
-  box-shadow: none !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+
+#zen-calendar-mod .zc-day.zc-today:hover {
+  filter: brightness(1.1);
 }
 
 /* Selected day - Very subtle hover background highlight, no border boxes */
@@ -278,8 +282,8 @@
 }
 
 #zen-calendar-mod .zc-day.zc-selected.zc-today {
-  outline: 1.5px solid var(--zc-accent) !important;
-  outline-offset: 1px;
+  outline: 2px solid var(--zc-accent) !important;
+  outline-offset: 2px;
 }
 
 /* ---------- Event Dots ---------- */
