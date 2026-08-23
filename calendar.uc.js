@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Zen Calendar
-// @version        1.0.0
+// @version        1.1.0
 // @description    Interactive sidebar calendar for Zen Browser
 // @author         Abh1jeet
 // @include        main
@@ -80,10 +80,6 @@
 
   function monthName(date) {
     return date.toLocaleString("default", { month: "long" });
-  }
-
-  function weekdayName(date) {
-    return date.toLocaleString("default", { weekday: "short" });
   }
 
   function formatAgendaHeader(date) {
@@ -542,9 +538,16 @@
 
     root.replaceChildren();
 
-    // 1. Top Widget Header (Calendar ... )
-    const widgetHeader = createEl("div", "zc-widget-header");
-    const widgetTitle = createEl("div", "zc-widget-title", "Calendar");
+    // 1. Sleek Toggle Button (like the native Space Selector)
+    const toggleBtn = createEl("div", "zc-toggle");
+    
+    const toggleLeft = createEl("div", "zc-toggle-left");
+    
+    const chevron = createEl("span", "zc-chevron", "›");
+    const icon = createEl("span", "zc-icon", "▦");
+    const label = createEl("span", "zc-label", "Calendar");
+    
+    toggleLeft.append(chevron, icon, label);
 
     const moreBtn = createEl("button", "zc-header-more-btn", "···");
     moreBtn.title = "Calendar Options";
@@ -554,23 +557,35 @@
       render();
     });
 
-    widgetHeader.append(widgetTitle, moreBtn);
-    root.append(widgetHeader);
+    toggleBtn.append(toggleLeft, moreBtn);
+    root.append(toggleBtn);
 
-    // 2. Calendar Month & Grid Container
+    // Toggle expand/collapse when clicking header left-side
+    toggleLeft.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const expanded = root.classList.toggle("expanded");
+      Prefs.setString("zen-calendar.start-expanded", String(expanded));
+    });
+
+    // 2. Expandable Content container
+    const content = createEl("div", "zc-content");
+
+    // Calendar Month & Grid Container
     const calendarContainer = createEl("div", "zc-calendar-container");
     renderCalendar(calendarContainer);
-    root.append(calendarContainer);
+    content.append(calendarContainer);
 
-    // 3. Agenda Section
+    // Agenda Section
     const showAgenda = Prefs.getBool("zen-calendar.show-agenda", true);
     if (showAgenda) {
       const agendaContainer = createEl("div", "zc-agenda-container");
       renderAgenda(agendaContainer);
-      root.append(agendaContainer);
+      content.append(agendaContainer);
     }
 
-    // 4. Modals & Menus
+    root.append(content);
+
+    // 3. Modals & Menus
     renderMenu(root);
     renderModal(root);
   }
@@ -580,14 +595,13 @@
     if (document.getElementById(ID)) return true;
 
     // Search for ideal insertion targets in Zen Browser sidebar hierarchy
-    // Priority:
-    // 1. After workspace indicator
-    // 2. Before vertical tabs list / wrapper
-    // 3. After essentials
-    // 4. Inside sidebar box
-    const workspaceIndicator = document.querySelector(
-      "#zen-current-workspace-indicator, #zen-workspaces-button, .zen-workspace-indicator"
-    );
+    // We prioritize inserting directly after the space selector
+    const spaceIndicator = 
+      document.getElementById("zen-current-workspace-indicator-container") ||
+      document.querySelector(".zen-current-workspace-indicator") ||
+      document.getElementById("zen-workspaces-button") ||
+      document.querySelector(".zen-workspace-tabs-section");
+
     const tabsWrapper = document.querySelector(
       "#zen-sidebar-tabs-wrapper, #zen-sidebar-tabs, #vertical-tabs-box, #tabbrowser-tabs"
     );
@@ -597,9 +611,9 @@
     let targetParent = null;
     let nextSibling = null;
 
-    if (workspaceIndicator && workspaceIndicator.parentElement) {
-      targetParent = workspaceIndicator.parentElement;
-      nextSibling = workspaceIndicator.nextElementSibling;
+    if (spaceIndicator && spaceIndicator.parentElement) {
+      targetParent = spaceIndicator.parentElement;
+      nextSibling = spaceIndicator.nextSibling;
     } else if (tabsWrapper && tabsWrapper.parentElement) {
       targetParent = tabsWrapper.parentElement;
       nextSibling = tabsWrapper;
@@ -620,6 +634,12 @@
       targetParent.insertBefore(root, nextSibling);
     } else {
       targetParent.append(root);
+    }
+
+    // Set initial expanded state from preference
+    const startExpanded = Prefs.getBool("zen-calendar.start-expanded", false);
+    if (startExpanded) {
+      root.classList.add("expanded");
     }
 
     render();
