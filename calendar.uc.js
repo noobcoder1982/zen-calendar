@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Zen Calendar
-// @version        1.2.0
+// @version        1.3.0
 // @description    Interactive sidebar calendar for Zen Browser
 // @author         Abh1jeet
 // @include        main
@@ -138,7 +138,8 @@
     events: getInitialEvents(),
     showModal: false,
     showMenu: false,
-    selectedColor: "#3b82f6"
+    selectedColor: "#3b82f6",
+    suppressRender: false
   };
 
   function saveEvents() {
@@ -264,8 +265,10 @@
 
     const dateKey = formatDateKey(date);
     const dayEvents = state.events[dateKey] || [];
+    
+    const showDots = Prefs.getBool("zen-calendar.show-event-dots", true);
 
-    if (dayEvents.length > 0) {
+    if (showDots && dayEvents.length > 0) {
       cell.classList.add("zc-has-events");
       const dotsContainer = createEl("span", "zc-dots-container");
       
@@ -408,7 +411,8 @@
       { name: "red", hex: "#ef4444" },
       { name: "green", hex: "#22c55e" },
       { name: "orange", hex: "#f59e0b" },
-      { name: "purple", hex: "#a855f7" }
+      { name: "purple", hex: "#a855f7" },
+      { name: "white", hex: "#ffffff" }
     ];
 
     colors.forEach((c) => {
@@ -529,6 +533,8 @@
 
   // Main Render Function
   function render() {
+    if (state.suppressRender) return;
+    
     const root = document.getElementById(ID);
     if (!root) return;
 
@@ -537,7 +543,12 @@
     // 1. Sleek Toggle Button (like the native Space Selector)
     const toggleBtn = createEl("div", "zc-toggle");
     const toggleLeft = createEl("div", "zc-toggle-left");
-    const label = createEl("span", "zc-label", "Calendar");
+    
+    // Add current date highlight
+    const todayStr = new Date().toLocaleDateString("default", { month: "short", day: "numeric" });
+    const label = createEl("span", "zc-label");
+    label.innerHTML = `Calendar <span class="zc-header-date" style="color: var(--zc-accent); font-weight: 600; font-size: 10.5px; opacity: 0.9; margin-left: 6px;">· ${todayStr}</span>`;
+    
     toggleLeft.append(label);
 
     const moreBtn = createEl("div", "zc-header-more-btn", "···");
@@ -580,13 +591,51 @@
     renderMenu(root);
     renderModal(root);
   }
+  
+  // Settings Apply Logic (dynamically read preferences)
+  function applySettings() {
+    const root = document.getElementById(ID);
+    if (!root) return;
+
+    // 1. Enabled
+    const enabled = Prefs.getBool("zen-calendar.enabled", true);
+    root.style.display = enabled ? "" : "none";
+    if (!enabled) return;
+
+    // 2. Compact Calendar
+    const compact = Prefs.getBool("zen-calendar.compact", false);
+    if (compact) {
+      root.classList.add("zc-compact");
+    } else {
+      root.classList.remove("zc-compact");
+    }
+
+    // 3. Accent Color
+    const accent = Prefs.getString("zen-calendar.accent", "blue");
+    const accentMap = {
+      blue: "#3b82f6",
+      purple: "#a855f7",
+      green: "#22c55e",
+      orange: "#f59e0b",
+      red: "#ef4444",
+      white: "#ffffff"
+    };
+    
+    if (accentMap[accent]) {
+      root.style.setProperty("--zc-accent", accentMap[accent]);
+    } else {
+      root.style.removeProperty("--zc-accent");
+    }
+
+    // Trigger full re-render so components (Agenda, Event Dots, Monday Start) pick up the settings
+    render();
+  }
 
   // DOM Insertion & Initialization
   function createUI() {
     if (document.getElementById(ID)) return true;
 
     // Search for ideal insertion targets in Zen Browser sidebar hierarchy
-    // We prioritize inserting directly after the space selector
     const spaceIndicator = 
       document.getElementById("zen-current-workspace-indicator-container") ||
       document.querySelector(".zen-current-workspace-indicator") ||
@@ -633,16 +682,38 @@
       root.classList.add("expanded");
     }
 
-    render();
+    // Apply settings runs render() implicitly
+    applySettings();
     return true;
   }
+  
+  // Preferences Observer to detect live Sine setting changes
+  const prefObserver = {
+    observe(subject, topic, data) {
+      if (topic === "nsPref:changed" && data && data.startsWith("zen-calendar.")) {
+        applySettings();
+      }
+    }
+  };
 
   function init() {
-    if (createUI()) return;
+    if (createUI()) {
+      try {
+        if (typeof Services !== "undefined" && Services.prefs) {
+          Services.prefs.addObserver("zen-calendar.", prefObserver, false);
+        }
+      } catch(e) {}
+      return;
+    }
 
     // Observe DOM mutations until sidebar is fully mounted
     const observer = new MutationObserver(() => {
       if (createUI()) {
+        try {
+          if (typeof Services !== "undefined" && Services.prefs) {
+            Services.prefs.addObserver("zen-calendar.", prefObserver, false);
+          }
+        } catch(e) {}
         observer.disconnect();
       }
     });
