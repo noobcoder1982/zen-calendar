@@ -627,12 +627,6 @@
   filter: brightness(0.9);
 }
 
-/* ---------- Compact & Collapsed Sidebar Support ---------- */
-
-:root[zen-sidebar-collapsed="true"] #zen-calendar-mod,
-:root[zen-compact-mode="true"] #zen-calendar-mod {
-  display: none;
-}
 
 /* ---------- Compact Mod Settings Overrides ---------- */
 
