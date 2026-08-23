@@ -56,8 +56,7 @@
   color: var(--zc-text);
 }
 
-/* ---------- Global element overrides scoped under widget ---------- */
-#zen-calendar-mod button,
+/* ---------- Input overrides scoped under widget ---------- */
 #zen-calendar-mod input {
   border: none !important;
   background: transparent !important;
@@ -69,7 +68,7 @@
   font-family: inherit;
 }
 
-/* ---------- Toggle Button (Space Tab Style) ---------- */
+/* ---------- Toggle Header (Space Tab Style) ---------- */
 
 #zen-calendar-mod .zc-toggle {
   width: 100%;
@@ -92,38 +91,17 @@
 #zen-calendar-mod .zc-toggle-left {
   display: flex;
   align-items: center;
-  gap: 8px;
   flex: 1;
   height: 100%;
 }
 
-#zen-calendar-mod .zc-chevron {
-  font-size: 14px;
-  color: var(--zc-text-muted) !important;
-  width: 12px;
-  display: inline-block;
-  text-align: center;
-  transition: transform 0.2s ease;
-}
-
-#zen-calendar-mod.expanded .zc-chevron {
-  transform: rotate(90deg);
-}
-
-#zen-calendar-mod .zc-icon {
-  font-size: 13px;
-  color: var(--zc-text-muted) !important;
-  opacity: 0.8;
-  display: inline-flex;
-  align-items: center;
-}
-
 #zen-calendar-mod .zc-label {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--zc-text) !important;
 }
 
+/* More Options button (···) - Flat, aligned right, appears only on hover */
 #zen-calendar-mod .zc-header-more-btn {
   background: transparent !important;
   border: none !important;
@@ -133,14 +111,23 @@
   cursor: pointer;
   padding: 2px 6px !important;
   border-radius: 4px;
-  transition: background 0.15s ease, color 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0 !important;
+  pointer-events: none;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease !important;
+  margin-left: auto;
+}
+
+#zen-calendar-mod:hover .zc-header-more-btn,
+#zen-calendar-mod .zc-toggle:hover .zc-header-more-btn {
+  opacity: 0.7 !important;
+  pointer-events: auto;
 }
 
 #zen-calendar-mod .zc-header-more-btn:hover {
-  background: var(--zc-hover) !important;
+  opacity: 1 !important;
   color: var(--zc-text) !important;
 }
 
@@ -271,19 +258,19 @@
   color: var(--zc-text-muted) !important;
 }
 
-/* Today highlighted with active theme accent color */
+/* Today highlighted with a minimal outline and light background */
 #zen-calendar-mod .zc-day.zc-today {
-  background: var(--zc-accent) !important;
-  color: var(--zen-primary-color-text, #ffffff) !important;
+  border: 1.5px solid var(--zc-accent) !important;
+  background: var(--zc-hover) !important;
+  color: var(--zc-text) !important;
   font-weight: 600 !important;
   border-radius: 50% !important;
-  border: none !important;
-  box-shadow: 0 0 8px color-mix(in srgb, var(--zc-accent) 45%, transparent) !important;
+  box-shadow: none !important;
 }
 
-/* Selected day */
+/* Selected day - Very subtle hover background highlight, no border boxes */
 #zen-calendar-mod .zc-day.zc-selected:not(.zc-today) {
-  border: 1px solid var(--zc-border) !important;
+  border: none !important;
   border-radius: 6px !important;
   background: var(--zc-hover) !important;
   color: var(--zc-text) !important;
@@ -291,7 +278,7 @@
 }
 
 #zen-calendar-mod .zc-day.zc-selected.zc-today {
-  outline: 1.5px solid var(--zen-primary-color-text, #ffffff) !important;
+  outline: 1.5px solid var(--zc-accent) !important;
   outline-offset: 1px;
 }
 
@@ -314,10 +301,6 @@
   height: 3px;
   border-radius: 50%;
   background: var(--zc-accent) !important;
-}
-
-#zen-calendar-mod .zc-day.zc-today .zc-event-dot {
-  background: var(--zen-primary-color-text, #ffffff) !important;
 }
 
 /* ---------- Agenda Section ---------- */

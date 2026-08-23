@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Zen Calendar
-// @version        1.1.0
+// @version        1.2.0
 // @description    Interactive sidebar calendar for Zen Browser
 // @author         Abh1jeet
 // @include        main
@@ -20,9 +20,7 @@
     getString(key, defaultVal = "") {
       try {
         if (typeof Services !== "undefined" && Services.prefs) {
-          if (Services.prefs.prefHasUserValue(key)) {
-            return Services.prefs.getStringPref(key);
-          }
+          return Services.prefs.getStringPref(key);
         }
       } catch (e) {}
       try {
@@ -44,9 +42,7 @@
     getBool(key, defaultVal = false) {
       try {
         if (typeof Services !== "undefined" && Services.prefs) {
-          if (Services.prefs.prefHasUserValue(key)) {
-            return Services.prefs.getBoolPref(key);
-          }
+          return Services.prefs.getBoolPref(key);
         }
       } catch (e) {}
       try {
@@ -163,7 +159,7 @@
     // 1. Month Bar
     const monthBar = createEl("div", "zc-month-bar");
     const monthTitle = createEl(
-      "button",
+      "div",
       "zc-month-title",
       `${monthName(state.viewDate)} ${state.viewDate.getFullYear()}`
     );
@@ -175,7 +171,7 @@
     });
 
     const navControls = createEl("div", "zc-nav-controls");
-    const prevBtn = createEl("button", "zc-nav-btn", "‹");
+    const prevBtn = createEl("div", "zc-nav-btn", "‹");
     prevBtn.title = "Previous Month";
     prevBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -183,7 +179,7 @@
       render();
     });
 
-    const nextBtn = createEl("button", "zc-nav-btn", "›");
+    const nextBtn = createEl("div", "zc-nav-btn", "›");
     nextBtn.title = "Next Month";
     nextBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -250,7 +246,7 @@
 
   // Create single day cell in grid
   function createDayCell(date, dayNum, isOtherMonth) {
-    const cell = createEl("button", "zc-day");
+    const cell = createEl("div", "zc-day");
     const numSpan = createEl("span", "zc-day-num", String(dayNum));
     cell.append(numSpan);
 
@@ -334,7 +330,7 @@
           info.append(duration);
         }
 
-        const removeBtn = createEl("button", "zc-event-delete", "×");
+        const removeBtn = createEl("div", "zc-event-delete", "×");
         removeBtn.title = "Delete event";
         removeBtn.addEventListener("click", (e) => {
           e.stopPropagation();
@@ -354,7 +350,7 @@
     container.append(list);
 
     // "+ Add event" button
-    const addBtn = createEl("button", "zc-add-btn");
+    const addBtn = createEl("div", "zc-add-btn");
     const plusIcon = createEl("span", "zc-add-icon", "+");
     const addLabel = createEl("span", "zc-add-label", "Add event");
     addBtn.append(plusIcon, addLabel);
@@ -416,7 +412,7 @@
     ];
 
     colors.forEach((c) => {
-      const colorBtn = createEl("button", "zc-color-choice");
+      const colorBtn = createEl("div", "zc-color-choice");
       colorBtn.style.backgroundColor = c.hex;
       if (state.selectedColor === c.hex) {
         colorBtn.classList.add("zc-color-active");
@@ -431,13 +427,13 @@
 
     // Actions row
     const actionsRow = createEl("div", "zc-modal-actions");
-    const cancelBtn = createEl("button", "zc-btn zc-btn-secondary", "Cancel");
+    const cancelBtn = createEl("div", "zc-btn zc-btn-secondary", "Cancel");
     cancelBtn.addEventListener("click", () => {
       state.showModal = false;
       render();
     });
 
-    const saveBtn = createEl("button", "zc-btn zc-btn-primary", "Save Event");
+    const saveBtn = createEl("div", "zc-btn zc-btn-primary", "Save Event");
     const submit = () => {
       const text = titleInput.value.trim();
       if (!text) return;
@@ -491,7 +487,7 @@
 
     const menu = createEl("div", "zc-dropdown-menu");
 
-    const todayOpt = createEl("button", "zc-menu-item", "Jump to Today");
+    const todayOpt = createEl("div", "zc-menu-item", "Jump to Today");
     todayOpt.addEventListener("click", () => {
       state.viewDate = new Date();
       state.selectedDate = new Date();
@@ -499,14 +495,14 @@
       render();
     });
 
-    const addOpt = createEl("button", "zc-menu-item", "Add Event...");
+    const addOpt = createEl("div", "zc-menu-item", "Add Event...");
     addOpt.addEventListener("click", () => {
       state.showMenu = false;
       state.showModal = true;
       render();
     });
 
-    const clearOpt = createEl("button", "zc-menu-item zc-menu-danger", "Clear Today's Events");
+    const clearOpt = createEl("div", "zc-menu-item zc-menu-danger", "Clear Today's Events");
     clearOpt.addEventListener("click", () => {
       const dateKey = formatDateKey(state.selectedDate);
       if (state.events[dateKey]) {
@@ -540,16 +536,11 @@
 
     // 1. Sleek Toggle Button (like the native Space Selector)
     const toggleBtn = createEl("div", "zc-toggle");
-    
     const toggleLeft = createEl("div", "zc-toggle-left");
-    
-    const chevron = createEl("span", "zc-chevron", "›");
-    const icon = createEl("span", "zc-icon", "▦");
     const label = createEl("span", "zc-label", "Calendar");
-    
-    toggleLeft.append(chevron, icon, label);
+    toggleLeft.append(label);
 
-    const moreBtn = createEl("button", "zc-header-more-btn", "···");
+    const moreBtn = createEl("div", "zc-header-more-btn", "···");
     moreBtn.title = "Calendar Options";
     moreBtn.addEventListener("click", (e) => {
       e.stopPropagation();
