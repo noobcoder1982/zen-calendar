@@ -602,12 +602,12 @@
     let targetParent = null;
     let nextSibling = null;
 
-    if (spaceIndicator && spaceIndicator.parentElement) {
+    if (tabsWrapper && tabsWrapper.parentElement) {
+      targetParent = tabsWrapper.parentElement;
+      nextSibling = tabsWrapper.nextSibling;
+    } else if (spaceIndicator && spaceIndicator.parentElement) {
       targetParent = spaceIndicator.parentElement;
       nextSibling = spaceIndicator.nextSibling;
-    } else if (tabsWrapper && tabsWrapper.parentElement) {
-      targetParent = tabsWrapper.parentElement;
-      nextSibling = tabsWrapper;
     } else if (essentials && essentials.parentElement) {
       targetParent = essentials.parentElement;
       nextSibling = essentials.nextElementSibling;
